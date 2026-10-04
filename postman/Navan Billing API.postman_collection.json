@@ -1,0 +1,335 @@
+{
+  "info": {
+    "name": "Navan Billing API",
+    "description": "Local collection for the transaction and invoice endpoints currently implemented.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "transaction_id",
+      "value": "txn_1"
+    },
+    {
+      "key": "invoice_id",
+      "value": "inv_1"
+    }
+  ],
+  "item": [
+    {
+      "name": "Create flight transaction",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('created', function () { pm.response.to.have.status(201); });",
+              "if (pm.response.code === 201) { pm.collectionVariables.set('transaction_id', pm.response.json().id); }"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"type\": \"flight\",\n  \"external_id\": \"postman-flight-{{$timestamp}}\",\n  \"currency\": \"USD\",\n  \"occurred_at\": \"2026-10-03T10:00:00Z\",\n  \"total\": 1200.00,\n  \"tax_lines\": [{\"name\": \"sales_tax\", \"rate\": 0.08, \"amount\": 88.89}],\n  \"fee_lines\": [],\n  \"metadata\": {\n    \"origin\": \"SFO\",\n    \"destination\": \"LAX\",\n    \"fare\": 1111.11,\n    \"coupons\": [{\n      \"flight_number\": \"UA123\",\n      \"carrier\": \"United\",\n      \"from\": \"SFO\",\n      \"to\": \"LAX\",\n      \"departure\": \"2026-10-03T10:00:00Z\",\n      \"arrival\": \"2026-10-03T12:00:00Z\"\n    }]\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/transactions"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Patch transaction total",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('updated', function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"total\": 1201.50\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/transactions/{{transaction_id}}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create invoice from transaction",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('created', function () { pm.response.to.have.status(201); });",
+              "if (pm.response.code === 201) { pm.collectionVariables.set('invoice_id', pm.response.json().id); }"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"transaction_id\": \"{{transaction_id}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/invoices"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Patch invoice transactions",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('updated', function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"transaction_id\": \"{{transaction_id}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/invoices/{{invoice_id}}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get invoice",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('found', function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/invoices/{{invoice_id}}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get transaction",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('found', function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/transactions/{{transaction_id}}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "List transactions",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('listed', function () { pm.response.to.have.status(200); });",
+              "pm.test('page response shape', function () { pm.expect(pm.response.json()).to.have.all.keys('items', 'limit', 'offset', 'has_more'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/transactions?limit=50&offset=0",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "transactions"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "50"
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "List invoices",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('listed', function () { pm.response.to.have.status(200); });",
+              "pm.test('page response shape', function () { pm.expect(pm.response.json()).to.have.all.keys('items', 'limit', 'offset', 'has_more'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/invoices?limit=50&offset=0",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "invoices"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "50"
+            },
+            {
+              "key": "offset",
+              "value": "0"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete transaction",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('deleted', function () { pm.response.to.have.status(204); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/transactions/{{transaction_id}}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete invoice",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('deleted', function () { pm.response.to.have.status(204); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/invoices/{{invoice_id}}"
+        }
+      },
+      "response": []
+    }
+  ]
+}
